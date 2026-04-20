@@ -8,15 +8,15 @@ use Illuminate\Http\Request;
 
 class ResepController extends Controller
 {
-    public function index()
-    {
-        $data = Resep::with(['user', 'kategori'])->get();
+    public function index(Request $request)
+{
+    $data = Resep::where('user_id', $request->user()->id)->get();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $data
-        ]);
-    }
+    return response()->json([
+        'status' => 'success',
+        'data' => $data
+    ]);
+}
 
     public function show($id)
     {
@@ -38,23 +38,25 @@ class ResepController extends Controller
         'langkah' => 'required',
     ]);
 
-    $data = Resep::create($validated);
-
-    return response()->json([
-        'status' => 'success',
-        'data' => $data
-    ]);
+    $data = Resep::create([
+    'user_id' => $request->user()->id,
+    'kategori_id' => $request->kategori_id,
+    'nama_resep' => $request->nama_resep,
+    'deskripsi' => $request->deskripsi,
+    'bahan' => $request->bahan,
+    'langkah' => $request->langkah
+]);
 }
 public function update(Request $request, $id)
 {
     $resep = Resep::find($id);
 
-    if (!$resep) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Data tidak ditemukan'
-        ]);
-    }
+    if ($resep->user_id != $request->user()->id) {
+    return response()->json([
+        'status' => 'error',
+        'message' => 'Unauthorized'
+    ], 403);
+}
 
     $resep->update($request->all());
 
