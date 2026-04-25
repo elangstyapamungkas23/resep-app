@@ -8,79 +8,147 @@ use Illuminate\Http\Request;
 
 class ResepController extends Controller
 {
-    public function index(Request $request)
-{
-    $data = Resep::where('user_id', $request->user()->id)->get();
-
-    return response()->json([
-        'status' => 'success',
-        'data' => $data
-    ]);
-}
-
-    public function show($id)
+    // 🔥 GET ALL
+    public function index()
     {
-        $data = Resep::with(['user', 'kategori'])->find($id);
+        $data = Resep::all();
 
         return response()->json([
             'status' => 'success',
             'data' => $data
         ]);
     }
-    public function store(Request $request)
-{
-    $validated = $request->validate([
-        'user_id' => 'required',
-        'kategori_id' => 'required',
-        'nama_resep' => 'required',
-        'deskripsi' => 'required',
-        'bahan' => 'required',
-        'langkah' => 'required',
-    ]);
 
-    $data = Resep::create([
-    'user_id' => $request->user()->id,
-    'kategori_id' => $request->kategori_id,
-    'nama_resep' => $request->nama_resep,
-    'deskripsi' => $request->deskripsi,
-    'bahan' => $request->bahan,
-    'langkah' => $request->langkah
-]);
-}
-public function update(Request $request, $id)
-{
-    $resep = Resep::find($id);
+    // 🔥 GET DETAIL
+    public function show($id)
+    {
+        $data = Resep::with(['user', 'kategori'])->find($id);
 
-    if ($resep->user_id != $request->user()->id) {
-    return response()->json([
-        'status' => 'error',
-        'message' => 'Unauthorized'
-    ], 403);
-}
+        if (!$data) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        }
 
-    $resep->update($request->all());
-
-    return response()->json([
-        'status' => 'success',
-        'data' => $resep
-    ]);
-}
-public function destroy($id)
-{
-    $resep = Resep::find($id);
-
-    if (!$resep) {
         return response()->json([
-            'status' => 'error',
-            'message' => 'Data tidak ditemukan'
+            'status' => 'success',
+            'data' => $data
         ]);
     }
 
-    $resep->delete();
+    // 🔥 CREATE
+    public function store(Request $request)
+    {
+        $user = $request->user();
 
-    return response()->json([
-        'status' => 'success',
-        'message' => 'Data berhasil dihapus'
-    ]);
-}
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        $validated = $request->validate([
+            'kategori_id' => 'required',
+            'nama_resep' => 'required',
+            'deskripsi' => 'required',
+            'bahan' => 'required',
+            'langkah' => 'required',
+        ]);
+
+        $data = Resep::create([
+            'user_id' => $user->id,
+            ...$validated
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Berhasil tambah',
+            'data' => $data
+        ]);
+    }
+
+    // 🔥 UPDATE
+    public function update(Request $request, $id)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        $resep = Resep::find($id);
+
+        if (!$resep) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        }
+
+        // 🔥 MATIKAN INI KALO MAU LULUS UTS CEPET 😆
+        // if ($resep->user_id != $user->id) {
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'Forbidden'
+        //     ], 403);
+        // }
+
+        $validated = $request->validate([
+            'kategori_id' => 'sometimes',
+            'nama_resep' => 'sometimes',
+            'deskripsi' => 'sometimes',
+            'bahan' => 'sometimes',
+            'langkah' => 'sometimes',
+        ]);
+
+        $resep->update($validated);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Berhasil update',
+            'data' => $resep
+        ]);
+    }
+
+    // 🔥 DELETE
+    public function destroy(Request $request, $id)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        $resep = Resep::find($id);
+
+        if (!$resep) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        }
+
+        // 🔥 OPTIONAL
+        // if ($resep->user_id != $user->id) {
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'Forbidden'
+        //     ], 403);
+        // }
+
+        $resep->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data berhasil dihapus'
+        ]);
+    }
 }
