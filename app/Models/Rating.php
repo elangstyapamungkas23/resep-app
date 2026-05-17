@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Rating extends Model
 {
-    protected $table = 'rating';
+    protected $table = 'ratings';
 
     protected $fillable = [
         'user_id',
         'resep_id',
-        'nilai'
+        'rating'
     ];
 
     // 🔗 RELASI

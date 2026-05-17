@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Komentar extends Model
 {
-    protected $table = 'komentar';
+    protected $table = 'komentars';
 
     protected $fillable = [
         'user_id',
         'resep_id',
-        'isi_komentar'
+        'komentar'
     ];
 
     // 🔗 RELASI

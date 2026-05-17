@@ -13,12 +13,22 @@ return new class extends Migration
     {
        Schema::create('reseps', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-    $table->foreignId('kategori_id')->constrained('kategori')->cascadeOnDelete();
+
+    $table->foreignId('user_id')
+          ->constrained('users')
+          ->onDelete('cascade');
+
+    $table->foreignId('kategori_id')
+          ->constrained('kategoris')
+          ->onDelete('cascade');
+
     $table->string('nama_resep');
     $table->text('deskripsi');
     $table->text('bahan');
     $table->text('langkah');
+
+    $table->string('gambar')->nullable();
+
     $table->timestamps();
 });
     }

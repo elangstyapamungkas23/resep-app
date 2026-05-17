@@ -9,13 +9,14 @@ class Resep extends Model
     protected $table = 'reseps';
 
     protected $fillable = [
-        'user_id',
-        'kategori_id',
-        'nama_resep',
-        'deskripsi',
-        'bahan',
-        'langkah'
-    ];
+    'user_id',
+    'kategori_id',
+    'nama_resep',
+    'deskripsi',
+    'bahan',
+    'langkah',
+    'gambar'
+];
 
     // 🔗 RELASI
 
@@ -42,5 +43,10 @@ class Resep extends Model
     public function ratings()
     {
         return $this->hasMany(Rating::class);
+    }
+
+    public function riwayats()
+    {
+    return $this->hasMany(Riwayat::class);
     }
 }

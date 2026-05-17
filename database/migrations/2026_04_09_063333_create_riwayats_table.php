@@ -11,13 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-    Schema::create('riwayat', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('user_id')->constrained()->onDelete('cascade');
-    $table->foreignId('resep_id')->constrained('resep')->onDelete('cascade');
-    $table->timestamp('tanggal')->useCurrent();
-    $table->timestamps();
-    });
+        Schema::create('riwayats', function (Blueprint $table) {
+
+            $table->id();
+
+            $table->foreignId('user_id')
+                ->constrained()
+                ->onDelete('cascade');
+
+            $table->foreignId('resep_id')
+                ->constrained('reseps')
+                ->onDelete('cascade');
+
+            $table->timestamps();
+        });
     }
 
     /**

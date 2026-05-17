@@ -11,7 +11,16 @@ class ResepController extends Controller
     // 🔥 GET ALL
     public function index()
     {
-        $data = Resep::all();
+        $data = Resep::with(['user', 'kategori'])->get();
+
+        $data->transform(function ($item) {
+
+            if ($item->gambar) {
+                $item->gambar = asset('storage/' . $item->gambar);
+            }
+
+            return $item;
+        });
 
         return response()->json([
             'status' => 'success',
@@ -29,6 +38,10 @@ class ResepController extends Controller
                 'status' => 'error',
                 'message' => 'Data tidak ditemukan'
             ], 404);
+        }
+
+        if ($data->gambar) {
+            $data->gambar = asset('storage/' . $data->gambar);
         }
 
         return response()->json([
@@ -55,16 +68,29 @@ class ResepController extends Controller
             'deskripsi' => 'required',
             'bahan' => 'required',
             'langkah' => 'required',
+            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
+
+        $gambarPath = null;
+
+        if ($request->hasFile('gambar')) {
+
+            $gambarPath = $request->file('gambar')->store('reseps', 'public');
+        }
 
         $data = Resep::create([
             'user_id' => $user->id,
-            ...$validated
+            'kategori_id' => $validated['kategori_id'],
+            'nama_resep' => $validated['nama_resep'],
+            'deskripsi' => $validated['deskripsi'],
+            'bahan' => $validated['bahan'],
+            'langkah' => $validated['langkah'],
+            'gambar' => $gambarPath
         ]);
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Berhasil tambah',
+            'message' => 'Resep berhasil ditambahkan',
             'data' => $data
         ]);
     }
@@ -90,23 +116,28 @@ class ResepController extends Controller
             ], 404);
         }
 
-        // 🔥 MATIKAN INI KALO MAU LULUS UTS CEPET 😆
-        // if ($resep->user_id != $user->id) {
-        //     return response()->json([
-        //         'status' => 'error',
-        //         'message' => 'Forbidden'
-        //     ], 403);
-        // }
-
         $validated = $request->validate([
             'kategori_id' => 'sometimes',
             'nama_resep' => 'sometimes',
             'deskripsi' => 'sometimes',
             'bahan' => 'sometimes',
             'langkah' => 'sometimes',
+            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
+        // 🔥 UPDATE GAMBAR
+        if ($request->hasFile('gambar')) {
+
+            $gambarPath = $request->file('gambar')->store('reseps', 'public');
+
+            $validated['gambar'] = $gambarPath;
+        }
+
         $resep->update($validated);
+
+        if ($resep->gambar) {
+            $resep->gambar = asset('storage/' . $resep->gambar);
+        }
 
         return response()->json([
             'status' => 'success',
@@ -135,14 +166,6 @@ class ResepController extends Controller
                 'message' => 'Data tidak ditemukan'
             ], 404);
         }
-
-        // 🔥 OPTIONAL
-        // if ($resep->user_id != $user->id) {
-        //     return response()->json([
-        //         'status' => 'error',
-        //         'message' => 'Forbidden'
-        //     ], 403);
-        // }
 
         $resep->delete();
 

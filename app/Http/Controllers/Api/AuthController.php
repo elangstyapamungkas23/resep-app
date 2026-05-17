@@ -13,16 +13,16 @@ class AuthController extends Controller
     // 🔥 REGISTER
     public function register(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6'
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password)
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password'])
         ]);
 
         return response()->json([
@@ -32,13 +32,19 @@ class AuthController extends Controller
         ]);
     }
 
-    // 🔥 LOGIN + TOKEN
+    // 🔥 LOGIN
     public function login(Request $request)
     {
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
+
+        if (!Auth::attempt($validated)) {
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Login gagal'
+                'message' => 'Email atau password salah'
             ], 401);
         }
 
@@ -49,17 +55,28 @@ class AuthController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Login berhasil',
-            'token' => $token
+            'token' => $token,
+            'data' => $user
         ]);
     }
 
+    // 🔥 PROFILE
+    public function profile(Request $request)
+    {
+        return response()->json([
+            'status' => 'success',
+            'data' => $request->user()
+        ]);
+    }
+
+    // 🔥 LOGOUT
     public function logout(Request $request)
     {
-    $request->user()->currentAccessToken()->delete();
+        $request->user()->currentAccessToken()->delete();
 
-    return response()->json([
-        'status' => 'success',
-        'message' => 'Logout berhasil'
-    ]);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Logout berhasil'
+        ]);
     }
 }
