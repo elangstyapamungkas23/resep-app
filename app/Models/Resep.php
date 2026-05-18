@@ -49,4 +49,9 @@ class Resep extends Model
     {
     return $this->hasMany(Riwayat::class);
     }
+
+    public function favorits()
+{
+    return $this->hasMany(Favorit::class);
+}
 }
