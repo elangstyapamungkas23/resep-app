@@ -10,55 +10,59 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    // 🔥 REGISTER
-    public function register(Request $request)
+    // FORM LOGIN
+    public function loginForm()
     {
-        $validated = $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6'
-        ]);
-
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password'])
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Register berhasil',
-            'data' => $user
-        ]);
+        return view('auth.login');
     }
+
+    // FORM REGISTER
+    public function registerForm()
+    {
+        return view('auth.register');
+    }
+
+    public function register(Request $request)
+{
+    $validated = $request->validate([
+        'name' => 'required',
+        'email' => 'required|email|unique:users',
+        'password' => 'required|min:6'
+    ]);
+
+    User::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => Hash::make($validated['password'])
+    ]);
+
+    return redirect('/login')->with(
+        'success',
+        'Email berhasil terdaftar, silakan login'
+    );
+}
 
     // 🔥 LOGIN
     public function login(Request $request)
-    {
-        $validated = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
+{
+    $validated = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required'
+    ]);
 
-        if (!Auth::attempt($validated)) {
+    if (!Auth::attempt($validated)) {
 
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Email atau password salah'
-            ], 401);
-        }
-
-        $user = Auth::user();
-
-        $token = $user->createToken('token-api')->plainTextToken;
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Login berhasil',
-            'token' => $token,
-            'data' => $user
-        ]);
+        return back()->with(
+            'error',
+            'Email atau password salah'
+        );
     }
+
+    return redirect('/')->with(
+        'success',
+        'Login berhasil'
+    );
+}
 
     // 🔥 PROFILE
     public function profile(Request $request)
@@ -70,13 +74,14 @@ class AuthController extends Controller
     }
 
     // 🔥 LOGOUT
-    public function logout(Request $request)
-    {
-        $request->user()->currentAccessToken()->delete();
+public function logout(Request $request)
+{
+    Auth::logout();
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Logout berhasil'
-        ]);
-    }
+    $request->session()->invalidate();
+
+    $request->session()->regenerateToken();
+
+    return redirect('/');
+}
 }

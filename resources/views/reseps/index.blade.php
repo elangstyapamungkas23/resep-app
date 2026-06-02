@@ -41,11 +41,17 @@ use Illuminate\Support\Str;
                 About
             </a>
 
-            <a href="/favorits" class="hover:text-orange-500 transition">
+            <a
+            href="{{ auth()->check() ? '/favorits' : '/login' }}"
+            class="hover:text-orange-500 transition"
+            >
             Favorit
             </a>
 
-            <a href="/riwayat" class="hover:text-orange-500 transition">
+            <a
+            href="{{ auth()->check() ? '/riwayat' : '/login' }}"
+            class="hover:text-orange-500 transition"
+            >
             Riwayat
             </a>
 
@@ -55,15 +61,46 @@ use Illuminate\Support\Str;
 
 <div class="flex items-center gap-4">
 
-    <p class="font-semibold text-slate-700">
-        {{ auth()->user()->name }}
-    </p>
+   <div class="flex items-center gap-3">
+
+    @if(auth()->user()->foto)
+
+        <img
+            src="{{ asset('storage/' . auth()->user()->foto) }}"
+            class="w-12 h-12 rounded-full object-cover"
+        >
+
+    @else
+
+        <img
+            src="https://ui-avatars.com/api/?name={{ auth()->user()->name }}"
+            class="w-12 h-12 rounded-full"
+        >
+
+    @endif
+
+    <div>
+
+        <p class="font-semibold text-slate-700">
+            {{ auth()->user()->name }}
+        </p>
+
+        <a
+            href="/profile"
+            class="text-orange-500 text-sm"
+        >
+            Lihat Profil
+        </a>
+
+    </div>
+
+</div>
 
     <form action="/logout" method="POST">
         @csrf
 
         <button
-            class="bg-red-500 text-white px-5 py-2 rounded-full"
+            class="bg-red-500 text-white px-5 py-2 rounded-full hover:scale-105 transition"
         >
             Logout
         </button>
@@ -72,7 +109,10 @@ use Illuminate\Support\Str;
 
 </div>
 
-@else
+@endauth
+
+
+@guest
 
 <a
     href="/login"
@@ -81,7 +121,7 @@ use Illuminate\Support\Str;
     Login
 </a>
 
-@endauth
+@endguest
 
     </nav>
 
@@ -106,6 +146,38 @@ use Illuminate\Support\Str;
     <!-- RECIPE LIST -->
     <section class="px-16 pb-20">
 <!-- SEARCH -->
+<div class="flex justify-between items-center mb-10">
+
+    <div>
+        <h2 class="text-4xl font-black text-slate-900">
+            Semua Resep 🍜
+        </h2>
+
+        <p class="text-slate-500 mt-2">
+            Jelajahi resep dari seluruh pengguna
+        </p>
+    </div>
+
+    @auth
+    <a
+        href="/reseps/create"
+        class="
+            bg-orange-500
+            hover:bg-orange-600
+            text-white
+            px-8
+            py-4
+            rounded-2xl
+            font-semibold
+            shadow-lg
+            transition
+        "
+    >
+        ➕ Tambah Resep
+    </a>
+    @endauth
+
+</div>
 <form action="/reseps" method="GET" class="mb-14">
 
     <div class="flex items-center gap-5">
@@ -184,7 +256,10 @@ use Illuminate\Support\Str;
         <div class="grid grid-cols-3 gap-10">
 
             @forelse($reseps as $resep)
-
+@php
+    $avgRating = round($resep->ratings->avg('rating') ?? 0, 1);
+    $totalRating = $resep->ratings->count();
+@endphp
             <div class="bg-white rounded-[40px] overflow-hidden shadow-lg hover:-translate-y-2 duration-300">
 
                 <!-- IMAGE -->
@@ -215,31 +290,137 @@ use Illuminate\Support\Str;
 
                     <div class="flex justify-between items-center mb-4">
 
-                        <p class="text-orange-500 font-semibold text-lg">
-                            Recipe
-                        </p>
+    <p class="text-orange-500 font-semibold text-lg">
+        Recipe
+    </p>
 
-                        <p class="text-yellow-500 text-lg">
-                            ⭐ 4.9
-                        </p>
+    <div class="flex items-center gap-2">
 
-                    </div>
+        <span class="text-yellow-500 text-lg">
+            ⭐ {{ round($resep->ratings->avg('rating') ?? 0, 1) }}
+        </span>
+
+        <span class="text-slate-500 text-sm">
+            ({{ $resep->ratings->count() }} rating)
+        </span>
+
+    </div>
+
+</div>
 
                     <h3 class="text-5xl font-black text-slate-900 mb-4 leading-tight">
-                        {{ $resep->nama_resep }}
-                    </h3>
+    {{ $resep->nama_resep }}
+</h3>
 
-                    <p class="text-2xl text-slate-500 leading-relaxed mb-8">
-                        {{ Str::limit($resep->deskripsi, 80) }}
-                    </p>
+<!-- PEMILIK RESEP -->
+<div class="flex items-center gap-3 mb-5">
+
+    @if($resep->user && $resep->user->foto)
+
+        <img
+            src="{{ asset('storage/' . $resep->user->foto) }}"
+            class="w-12 h-12 rounded-full object-cover border"
+        >
+
+    @else
+
+        <img
+            src="https://ui-avatars.com/api/?name={{ urlencode($resep->user->name ?? 'User') }}"
+            class="w-12 h-12 rounded-full"
+        >
+
+    @endif
+
+    <div>
+
+        <p class="font-semibold text-slate-800">
+            {{ $resep->user->name ?? 'Unknown User' }}
+        </p>
+
+        <p class="text-sm text-slate-500">
+            Pembuat Resep
+        </p>
+
+    </div>
+
+</div>
+
+<p class="text-2xl text-slate-500 leading-relaxed mb-8">
+    {{ Str::limit($resep->deskripsi, 80) }}
+</p>
 
                     <!-- DETAIL BUTTON -->
-                    <a
-                        href="/reseps/{{ $resep->id }}"
-                        class="inline-block bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-full text-xl font-semibold duration-300"
-                    >
-                        Lihat Detail
-                    </a>
+                  <div class="flex items-center gap-3 mt-8">
+
+    <a
+        href="/reseps/{{ $resep->id }}"
+        class="
+            flex-1
+            text-center
+            bg-orange-500
+            hover:bg-orange-600
+            text-white
+            py-3
+            rounded-2xl
+            font-semibold
+            transition
+        "
+    >
+        Lihat Detail
+    </a>
+
+   @if(
+    auth()->check() &&
+    (
+        auth()->id() == $resep->user_id ||
+        auth()->user()->role == 'admin'
+    )
+)
+
+    <a
+        href="/reseps/{{ $resep->id }}/edit"
+        class="
+            bg-yellow-400
+            hover:bg-yellow-500
+            text-white
+            px-5
+            py-3
+            rounded-2xl
+            font-semibold
+            transition
+        "
+    >
+        ✏️ Edit
+    </a>
+
+    <form
+        action="/reseps/{{ $resep->id }}"
+        method="POST"
+    >
+        @csrf
+        @method('DELETE')
+
+        <button
+            onclick="return confirm('Hapus resep ini?')"
+            class="
+                bg-red-500
+                hover:bg-red-600
+                text-white
+                px-5
+                py-3
+                rounded-2xl
+                font-semibold
+                transition
+            "
+        >
+            🗑 Hapus
+        </button>
+
+    </form>
+
+    @endif
+
+</div>
 
                 </div>
 

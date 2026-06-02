@@ -43,35 +43,68 @@
 
         @auth
 
-<div class="flex items-center gap-4">
+        <div class="flex items-center gap-4">
 
-    <p class="font-semibold text-slate-700">
-        {{ auth()->user()->name }}
-    </p>
+            <div class="flex items-center gap-3">
 
-    <form action="/logout" method="POST">
-        @csrf
+    @if(auth()->user()->foto)
 
-        <button
-            class="bg-red-500 text-white px-5 py-2 rounded-full"
+        <img
+            src="{{ asset('storage/' . auth()->user()->foto) }}"
+            class="w-12 h-12 rounded-full object-cover"
         >
-            Logout
-        </button>
 
-    </form>
+    @else
+
+        <img
+            src="https://ui-avatars.com/api/?name={{ auth()->user()->name }}"
+            class="w-12 h-12 rounded-full"
+        >
+
+    @endif
+
+    <div>
+
+        <p class="font-semibold text-slate-700">
+            {{ auth()->user()->name }}
+        </p>
+
+        <a
+            href="/profile"
+            class="text-orange-500 text-sm"
+        >
+            Lihat Profil
+        </a>
+
+    </div>
 
 </div>
 
-@else
+            <form action="/logout" method="POST">
+                @csrf
 
-<a
-    href="/login"
-    class="bg-orange-500 text-white px-6 py-2 rounded-full shadow-lg hover:scale-105 transition"
->
-    Login
-</a>
+                <button
+                    class="bg-red-500 text-white px-5 py-2 rounded-full hover:scale-105 transition"
+                >
+                    Logout
+                </button>
 
-@endauth
+            </form>
+
+        </div>
+
+        @endauth
+
+        @guest
+
+        <a
+            href="/login"
+            class="bg-orange-500 text-white px-6 py-2 rounded-full shadow-lg hover:scale-105 transition"
+        >
+            Login
+        </a>
+
+        @endguest
 
     </nav>
 
@@ -81,35 +114,70 @@
             Riwayat Resep 👀
         </h1>
 
-    <div class="grid grid-cols-3 gap-10">
+        <div class="grid grid-cols-3 gap-10">
 
-        @foreach($riwayats as $item)
+            @forelse($riwayats as $item)
 
-        <div class="bg-white p-8 rounded-[40px] shadow-lg">
+            <div class="bg-white p-8 rounded-[40px] shadow-lg">
 
-            <h2 class="text-4xl font-black mb-4">
-                {{ $item->resep->nama_resep }}
-            </h2>
+                <h2 class="text-4xl font-black mb-4">
+                    {{ $item->resep->nama_resep }}
+                </h2>
 
-            <p class="text-slate-500 text-xl mb-8">
-                Dilihat:
-                {{ $item->created_at->diffForHumans() }}
-            </p>
+                <p class="text-slate-500 text-xl mb-8">
+                    Dilihat:
+                    {{ $item->created_at->diffForHumans() }}
+                </p>
 
-            <a
-                href="/reseps/{{ $item->resep->id }}"
-                class="bg-orange-500 text-white px-6 py-3 rounded-full"
-            >
-                Lihat Lagi
-            </a>
+                <div class="flex gap-3">
+
+                    <a
+                        href="/reseps/{{ $item->resep->id }}"
+                        class="bg-orange-500 text-white px-6 py-3 rounded-full"
+                    >
+                        Lihat Lagi
+                    </a>
+
+                    <form
+                        action="/riwayat/{{ $item->id }}"
+                        method="POST"
+                    >
+                        @csrf
+                        @method('DELETE')
+
+                        <button
+                            type="submit"
+                            onclick="return confirm('Hapus riwayat ini?')"
+                            class="bg-red-500 text-white px-6 py-3 rounded-full"
+                        >
+                            Hapus
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+            @empty
+
+            <div class="col-span-3 text-center py-20">
+
+                <h2 class="text-5xl font-black text-slate-800 mb-4">
+                    Belum Ada Riwayat 👀
+                </h2>
+
+                <p class="text-2xl text-slate-500">
+                    Belum ada resep yang pernah kamu lihat.
+                </p>
+
+            </div>
+
+            @endforelse
 
         </div>
 
-        @endforeach
-
     </div>
-
-</div>
 
 </body>
 </html>

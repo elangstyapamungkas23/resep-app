@@ -31,6 +31,16 @@ return new class extends Migration
 
     $table->timestamps();
 });
+
+Schema::table('reseps', function (Blueprint $table) {
+
+    $table->foreignId('user_id')
+        ->nullable()
+        ->after('id')
+        ->constrained()
+        ->onDelete('cascade');
+
+});
     }
 
     /**

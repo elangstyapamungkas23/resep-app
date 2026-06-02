@@ -37,11 +37,17 @@
                 About
             </a>
 
-            <a href="/favorits" class="hover:text-orange-500 transition">
+            <a
+            href="{{ auth()->check() ? '/favorits' : '/login' }}"
+            class="hover:text-orange-500 transition"
+            >
             Favorit
             </a>
 
-            <a href="/riwayat" class="hover:text-orange-500 transition">
+            <a
+            href="{{ auth()->check() ? '/riwayat' : '/login' }}"
+            class="hover:text-orange-500 transition"
+            >
             Riwayat
             </a>
 
@@ -51,15 +57,46 @@
 
 <div class="flex items-center gap-4">
 
-    <p class="font-semibold text-slate-700">
-        {{ auth()->user()->name }}
-    </p>
+    <div class="flex items-center gap-3">
+
+    @if(auth()->user()->foto)
+
+        <img
+            src="{{ asset('storage/' . auth()->user()->foto) }}"
+            class="w-12 h-12 rounded-full object-cover"
+        >
+
+    @else
+
+        <img
+            src="https://ui-avatars.com/api/?name={{ auth()->user()->name }}"
+            class="w-12 h-12 rounded-full"
+        >
+
+    @endif
+
+    <div>
+
+        <p class="font-semibold text-slate-700">
+            {{ auth()->user()->name }}
+        </p>
+
+        <a
+            href="/profile"
+            class="text-orange-500 text-sm"
+        >
+            Lihat Profil
+        </a>
+
+    </div>
+
+</div>
 
     <form action="/logout" method="POST">
         @csrf
 
         <button
-            class="bg-red-500 text-white px-5 py-2 rounded-full"
+            class="bg-red-500 text-white px-5 py-2 rounded-full hover:scale-105 transition"
         >
             Logout
         </button>
@@ -68,7 +105,10 @@
 
 </div>
 
-@else
+@endauth
+
+
+@guest
 
 <a
     href="/login"
@@ -77,7 +117,7 @@
     Login
 </a>
 
-@endauth
+@endguest
 
     </nav>
 
