@@ -161,50 +161,139 @@
         </div>
 
         <!-- RESEP SAYA -->
-        <div class="mt-16">
+<!-- RESEP SAYA -->
 
-            <h2 class="text-5xl font-black mb-8">
-                Resep Saya 🍜
-            </h2>
+<div class="mt-16">
 
-            <div class="grid grid-cols-3 gap-8">
+```
+<h2 class="text-5xl font-black mb-8">
+    Resep Saya 🍜
+</h2>
 
-                @forelse($reseps ?? [] as $resep)
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-                    <div class="bg-white rounded-[30px] overflow-hidden shadow-lg">
+    @forelse($reseps as $resep)
 
-                        @if($resep->gambar)
+    <div class="bg-white rounded-[30px] overflow-hidden shadow-lg">
 
-                            <img
-                                src="{{ asset('storage/' . $resep->gambar) }}"
-                                class="w-full h-56 object-cover"
-                            >
+        <!-- FOTO -->
+        <div class="h-64 overflow-hidden">
 
-                        @endif
+            @if($resep->gambar)
 
-                        <div class="p-5">
+                <img
+                    src="{{ asset('storage/' . $resep->gambar) }}"
+                    class="w-full h-full object-cover"
+                >
 
-                            <h3 class="text-2xl font-bold">
-                                {{ $resep->nama_resep }}
-                            </h3>
+            @else
 
-                        </div>
+                <img
+                    src="https://images.unsplash.com/photo-1547592180-85f173990554"
+                    class="w-full h-full object-cover"
+                >
 
-                    </div>
+            @endif
 
-                @empty
+        </div>
 
-                    <div class="col-span-3 text-center py-10">
+        <!-- CONTENT -->
+        <div class="p-6">
 
-                        <h3 class="text-3xl font-bold text-slate-700">
-                            Belum ada resep 🍜
-                        </h3>
+            <h3 class="text-2xl font-bold text-slate-900 mb-3">
+                {{ $resep->nama_resep }}
+            </h3>
 
-                    </div>
+            <p class="text-slate-500 mb-6">
+                {{ \Illuminate\Support\Str::limit($resep->deskripsi, 80) }}
+            </p>
 
-                @endforelse
+            <div class="flex gap-2 flex-wrap">
+
+                <a
+                    href="/reseps/{{ $resep->id }}"
+                    class="
+                        flex-1
+                        text-center
+                        bg-orange-500
+                        hover:bg-orange-600
+                        text-white
+                        px-4
+                        py-3
+                        rounded-xl
+                        font-semibold
+                    "
+                >
+                    Detail
+                </a>
+
+                <a
+                    href="/reseps/{{ $resep->id }}/edit"
+                    class="
+                        flex-1
+                        text-center
+                        bg-yellow-400
+                        hover:bg-yellow-500
+                        text-white
+                        px-4
+                        py-3
+                        rounded-xl
+                        font-semibold
+                    "
+                >
+                    Edit
+                </a>
+
+                <form
+                    action="/reseps/{{ $resep->id }}"
+                    method="POST"
+                    class="flex-1"
+                >
+                    @csrf
+                    @method('DELETE')
+
+                    <button
+                        type="submit"
+                        onclick="return confirm('Hapus resep ini?')"
+                        class="
+                            w-full
+                            bg-red-500
+                            hover:bg-red-600
+                            text-white
+                            px-4
+                            py-3
+                            rounded-xl
+                            font-semibold
+                        "
+                    >
+                        Hapus
+                    </button>
+
+                </form>
 
             </div>
+
+        </div>
+
+    </div>
+
+    @empty
+
+    <div class="col-span-3 text-center py-10">
+
+        <h3 class="text-3xl font-bold text-slate-700">
+            Belum ada resep 🍜
+        </h3>
+
+    </div>
+
+    @endforelse
+
+</div>
+
+
+</div>
+
 
         </div>
 

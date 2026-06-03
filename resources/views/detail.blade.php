@@ -337,21 +337,56 @@ $isFavorit = auth()->check()
 
             <div class="flex justify-between items-start">
 
-                <div>
+                <div class="flex gap-4">
 
-                    <h3 class="font-bold text-xl text-slate-800">
-                        {{ $komentar->user->name ?? 'User' }}
-                    </h3>
+    {{-- FOTO PROFIL --}}
+    <a href="/users/{{ $komentar->user->id }}">
 
-                    <p class="text-slate-500 mt-2 text-lg">
-                        {{ $komentar->komentar }}
-                    </p>
+        @if($komentar->user && $komentar->user->foto)
 
-                </div>
+            <img
+                src="{{ asset('storage/' . $komentar->user->foto) }}"
+                class="w-14 h-14 rounded-full object-cover border"
+            >
+
+        @else
+
+            <img
+                src="https://ui-avatars.com/api/?name={{ urlencode($komentar->user->name ?? 'User') }}"
+                class="w-14 h-14 rounded-full"
+            >
+
+        @endif
+
+    </a>
+
+    <div>
+
+        {{-- NAMA USER --}}
+        <a
+            href="/users/{{ $komentar->user->id }}"
+            class="font-bold text-xl text-slate-800 hover:text-orange-500 transition"
+        >
+            {{ $komentar->user->name ?? 'User' }}
+        </a>
+
+        {{-- WAKTU KOMENTAR --}}
+        <p class="text-sm text-slate-400">
+            {{ $komentar->created_at->diffForHumans() }}
+        </p>
+
+        {{-- ISI KOMENTAR --}}
+        <p class="text-slate-500 mt-2 text-lg">
+            {{ $komentar->komentar }}
+        </p>
+
+    </div>
+
+</div>
 
                 @auth
 
-                @if(auth()->id() == $komentar->user_id)
+                @if(auth()->id() == $komentar->user_id || auth()->user()->role == 'admin')
 
                 <!-- BUTTON AREA -->
                 <div class="flex gap-3">

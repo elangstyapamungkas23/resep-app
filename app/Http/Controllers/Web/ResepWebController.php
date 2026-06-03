@@ -10,6 +10,7 @@ use App\Models\Komentar;
 use App\Models\Favorit;
 use App\Models\Riwayat;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ResepWebController extends Controller
 {
@@ -43,6 +44,35 @@ class ResepWebController extends Controller
         'kategoris',
         'kategori'
     ));
+}
+
+public function home()
+{
+    $trending = Resep::select(
+            'reseps.*',
+            DB::raw('AVG(ratings.rating) as rata_rating'),
+            DB::raw('COUNT(ratings.id) as total_rating')
+        )
+        ->leftJoin('ratings', 'reseps.id', '=', 'ratings.resep_id')
+        ->groupBy(
+            'reseps.id',
+            'reseps.user_id',
+            'reseps.kategori_id',
+            'reseps.nama_resep',
+            'reseps.deskripsi',
+            'reseps.bahan',
+            'reseps.langkah',
+            'reseps.gambar',
+            'reseps.created_at',
+            'reseps.updated_at'
+        )
+        ->havingRaw('COUNT(ratings.id) >= 1')
+        ->orderByDesc('rata_rating')
+        ->orderByDesc('total_rating')
+        ->take(3)
+        ->get();
+
+    return view('home', compact('trending'));
 }
 
     public function show($id)
@@ -129,15 +159,20 @@ class ResepWebController extends Controller
     }
 
     public function hapusKomentar($id)
-    {
-        $komentar = Komentar::where('id', $id)
-            ->where('user_id', auth()->id())
-            ->firstOrFail();
+{
+    $komentar = Komentar::findOrFail($id);
 
-        $komentar->delete();
-
-        return back();
+    if (
+        auth()->id() != $komentar->user_id
+        && auth()->user()->role != 'admin'
+    ) {
+        abort(403);
     }
+
+    $komentar->delete();
+
+    return back();
+}
 
     public function favorit(Request $request)
     {
@@ -187,6 +222,16 @@ class ResepWebController extends Controller
         ->firstOrFail();
 
     $riwayat->delete();
+
+    return back();
+}
+
+public function hapusSemuaRiwayat()
+{
+    Riwayat::where(
+        'user_id',
+        auth()->id()
+    )->delete();
 
     return back();
 }

@@ -4,9 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\ResepWebController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Web\ProfileController;
-Route::get('/', function () {
-    return view('home');
-});
+
+Route::get('/', [ResepWebController::class, 'home']);
 
 // AUTH
 Route::get('/login', [AuthController::class, 'loginForm']);
@@ -40,6 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/komentars', [ResepWebController::class, 'komentar']);
     Route::put('/komentars/{id}', [ResepWebController::class, 'updateKomentar']);
     Route::delete('/komentars/{id}', [ResepWebController::class, 'hapusKomentar']);
+    Route::get('/users/{id}', [ProfileController::class, 'showUser']);
 
     // favorit
     Route::get('/favorits', [ResepWebController::class, 'favoritIndex']);
@@ -47,6 +47,7 @@ Route::middleware('auth')->group(function () {
 
     // riwayat
     Route::get('/riwayat', [ResepWebController::class, 'riwayat']);
+    Route::delete('/riwayat/hapus-semua',[ResepWebController::class, 'hapusSemuaRiwayat']);
     Route::delete('/riwayat/{id}', [ResepWebController::class, 'hapusRiwayat']);
 
     // tambah resep

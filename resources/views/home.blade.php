@@ -206,10 +206,6 @@
 
             </div>
 
-            <button class="text-orange-500 font-semibold">
-                Lihat Semua →
-            </button>
-
         </div>
 
         <div class="grid grid-cols-4 gap-8">
@@ -303,117 +299,64 @@
 
         <div class="mb-14">
 
-            <p class="text-orange-500 font-semibold">
+            <p class="text-5xl font-bold text-orange-500">
                 Resep Populer
             </p>
-
-            <h2 class="text-5xl font-bold text-gray-900">
-                Trending Minggu Ini
-            </h2>
 
         </div>
 
         <div class="grid grid-cols-3 gap-10">
 
             <!-- CARD -->
-            <div class="bg-[#FFF7F1] rounded-[35px] overflow-hidden shadow-lg hover:-translate-y-2 transition">
+@foreach($trending as $resep)
 
-                <img
-                    src="https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?q=80&w=1200"
-                    class="h-64 w-full object-cover"
-                >
+<div class="bg-[#FFF7F1] rounded-[40px] overflow-hidden shadow-lg">
 
-                <div class="p-7">
+    @if($resep->gambar)
+    <img
+        src="{{ asset('storage/'.$resep->gambar) }}"
+        class="w-full h-[330px] object-cover"
+    >
+    @endif
 
-                    <div class="flex justify-between items-center mb-3">
+    <div class="p-8">
 
-                        <p class="text-orange-500 font-semibold">
-                            Makanan
-                        </p>
+        <div class="flex justify-between items-center">
 
-                        <p class="text-yellow-500">
-                            ⭐ 4.9
-                        </p>
+            <span class="text-orange-500 font-semibold">
+                Resep Populer
+            </span>
 
-                    </div>
+            <span class="text-yellow-500 font-bold">
+                ⭐ {{ number_format($resep->rata_rating,1) }}
+            </span>
 
-                    <h3 class="text-3xl font-bold mb-3">
-                        Mie Ayam
-                    </h3>
+        </div>
 
-                    <p class="text-gray-500">
-                        Resep mie ayam rumahan yang gurih dan lezat.
-                    </p>
+        <h2 class="text-4xl font-black mt-4">
+            {{ $resep->nama_resep }}
+        </h2>
 
-                </div>
+        <p class="text-slate-500 mt-4">
+            {{ Str::limit($resep->deskripsi, 80) }}
+        </p>
 
-            </div>
+        <p class="mt-3 text-sm text-slate-400">
+            {{ $resep->total_rating }} Rating
+        </p>
 
-            <!-- CARD -->
-            <div class="bg-[#FFF7F1] rounded-[35px] overflow-hidden shadow-lg hover:-translate-y-2 transition">
+        <a
+            href="/reseps/{{ $resep->id }}"
+            class="inline-block mt-6 bg-orange-500 text-white px-6 py-3 rounded-full"
+        >
+            Lihat Resep
+        </a>
 
-                <img
-                    src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=1200"
-                    class="h-64 w-full object-cover"
-                >
+    </div>
 
-                <div class="p-7">
+</div>
 
-                    <div class="flex justify-between items-center mb-3">
-
-                        <p class="text-orange-500 font-semibold">
-                            Fast Food
-                        </p>
-
-                        <p class="text-yellow-500">
-                            ⭐ 4.8
-                        </p>
-
-                    </div>
-
-                    <h3 class="text-3xl font-bold mb-3">
-                        Pizza
-                    </h3>
-
-                    <p class="text-gray-500">
-                        Pizza homemade dengan topping premium.
-                    </p>
-
-                </div>
-
-            </div>
-
-            <!-- CARD -->
-            <div class="bg-[#FFF7F1] rounded-[35px] overflow-hidden shadow-lg hover:-translate-y-2 transition">
-
-                <img
-                    src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=1200"
-                    class="h-64 w-full object-cover"
-                >
-
-                <div class="p-7">
-
-                    <div class="flex justify-between items-center mb-3">
-
-                        <p class="text-orange-500 font-semibold">
-                            Healthy
-                        </p>
-
-                        <p class="text-yellow-500">
-                            ⭐ 4.7
-                        </p>
-
-                    </div>
-
-                    <h3 class="text-3xl font-bold mb-3">
-                        Salad
-                    </h3>
-
-                    <p class="text-gray-500">
-                        Salad sehat dengan sayuran fresh.
-                    </p>
-
-                </div>
+@endforeach
 
             </div>
 

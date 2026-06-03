@@ -47,38 +47,38 @@
 
             <div class="flex items-center gap-3">
 
-    @if(auth()->user()->foto)
+                @if(auth()->user()->foto)
 
-        <img
-            src="{{ asset('storage/' . auth()->user()->foto) }}"
-            class="w-12 h-12 rounded-full object-cover"
-        >
+                    <img
+                        src="{{ asset('storage/' . auth()->user()->foto) }}"
+                        class="w-12 h-12 rounded-full object-cover"
+                    >
 
-    @else
+                @else
 
-        <img
-            src="https://ui-avatars.com/api/?name={{ auth()->user()->name }}"
-            class="w-12 h-12 rounded-full"
-        >
+                    <img
+                        src="https://ui-avatars.com/api/?name={{ auth()->user()->name }}"
+                        class="w-12 h-12 rounded-full"
+                    >
 
-    @endif
+                @endif
 
-    <div>
+                <div>
 
-        <p class="font-semibold text-slate-700">
-            {{ auth()->user()->name }}
-        </p>
+                    <p class="font-semibold text-slate-700">
+                        {{ auth()->user()->name }}
+                    </p>
 
-        <a
-            href="/profile"
-            class="text-orange-500 text-sm"
-        >
-            Lihat Profil
-        </a>
+                    <a
+                        href="/profile"
+                        class="text-orange-500 text-sm"
+                    >
+                        Lihat Profil
+                    </a>
 
-    </div>
+                </div>
 
-</div>
+            </div>
 
             <form action="/logout" method="POST">
                 @csrf
@@ -110,9 +110,34 @@
 
     <div class="px-16 py-16">
 
-        <h1 class="text-6xl font-black mb-14">
-            Riwayat Resep 👀
-        </h1>
+        <div class="flex justify-between items-center mb-14">
+
+            <h1 class="text-6xl font-black">
+                Riwayat Resep 👀
+            </h1>
+
+            @if($riwayats->count())
+
+            <form
+                action="/riwayat/hapus-semua"
+                method="POST"
+            >
+                @csrf
+                @method('DELETE')
+
+                <button
+                    type="submit"
+                    onclick="return confirm('Hapus semua riwayat?')"
+                    class="bg-red-500 text-white px-6 py-3 rounded-xl hover:bg-red-600 transition"
+                >
+                    🗑 Hapus Semua
+                </button>
+
+            </form>
+
+            @endif
+
+        </div>
 
         <div class="grid grid-cols-3 gap-10">
 

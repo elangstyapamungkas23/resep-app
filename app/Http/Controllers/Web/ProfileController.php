@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Resep;
 
 class ProfileController extends Controller
 {
@@ -66,4 +68,19 @@ class ProfileController extends Controller
 
         return redirect('/profile');
     }
+
+    public function showUser($id)
+{
+    $user = User::findOrFail($id);
+
+    $reseps = Resep::where('user_id', $id)
+        ->latest()
+        ->get();
+
+    return view('users.show', compact(
+        'user',
+        'reseps'
+    ));
+}
+
 }
