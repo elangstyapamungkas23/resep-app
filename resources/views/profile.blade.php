@@ -19,6 +19,7 @@
         <div class="flex gap-10 text-gray-700 font-medium">
             <a href="/">Home</a>
             <a href="/reseps">Resep</a>
+            <a href="/trending">Trending</a>
             <a href="/about">About</a>
             <a href="/favorits">Favorit</a>
             <a href="/riwayat">Riwayat</a>

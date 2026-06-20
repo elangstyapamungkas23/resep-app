@@ -37,6 +37,10 @@ use Illuminate\Support\Str;
                 Resep
             </a>
 
+            <a href="/trending" class="hover:text-orange-500 transition">
+                Trending
+            </a>
+
             <a href="/about" class="hover:text-orange-500 transition">
                 About
             </a>
@@ -81,18 +85,35 @@ use Illuminate\Support\Str;
 
     <div>
 
-        <p class="font-semibold text-slate-700">
-            {{ auth()->user()->name }}
-        </p>
+    <p class="font-semibold text-slate-700">
+        {{ auth()->user()->name }}
+    </p>
+
+    <div class="flex gap-2 text-sm">
 
         <a
             href="/profile"
-            class="text-orange-500 text-sm"
+            class="text-orange-500"
         >
             Lihat Profil
         </a>
 
+        @if(auth()->user()->role == 'admin')
+
+            <span class="text-slate-400">|</span>
+
+            <a
+                href="/admin"
+                class="text-red-500 font-semibold"
+            >
+                Admin
+            </a>
+
+        @endif
+
     </div>
+
+</div>
 
 </div>
 

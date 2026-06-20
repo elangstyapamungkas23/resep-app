@@ -11,7 +11,9 @@ class RiwayatController extends Controller
     // 🔥 GET ALL
     public function index()
     {
-        $data = Riwayat::with(['user', 'resep'])->get();
+        $data = Riwayat::with(['user', 'resep'])
+        ->latest()
+        ->get();
 
         return response()->json([
             'status' => 'success',
@@ -39,21 +41,28 @@ class RiwayatController extends Controller
 
     // 🔥 STORE
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'user_id' => 'required',
-            'resep_id' => 'required'
-        ]);
+{
+    $validated = $request->validate([
+        'user_id' => 'required',
+        'resep_id' => 'required'
+    ]);
 
-        $data = Riwayat::create($validated);
+    $data = Riwayat::updateOrCreate(
+        [
+            'user_id' => $validated['user_id'],
+            'resep_id' => $validated['resep_id'],
+        ],
+        [
+            'updated_at' => now()
+        ]
+    );
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Riwayat berhasil ditambahkan',
-            'data' => $data
-        ]);
-    }
-
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Riwayat berhasil ditambahkan',
+        'data' => $data
+    ]);
+}
     // 🔥 UPDATE
     public function update(Request $request, $id)
     {

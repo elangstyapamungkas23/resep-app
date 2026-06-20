@@ -9,27 +9,27 @@ use Illuminate\Http\Request;
 class FavoritController extends Controller
 {
     public function index()
-    {
-        $data = Favorit::all();
+{
+    $data = Favorit::with('resep')->get();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $data
-        ]);
-    }
+    return response()->json([
+        'status' => 'success',
+        'data' => $data
+    ]);
+}
 
     public function store(Request $request)
-    {
-        $data = Favorit::create([
-            'user_id' => $request->user_id,
-            'resep_id' => $request->resep_id
-        ]);
+{
+    $data = Favorit::firstOrCreate([
+        'user_id' => $request->user_id,
+        'resep_id' => $request->resep_id
+    ]);
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $data
-        ]);
-    }
+    return response()->json([
+        'status' => 'success',
+        'data' => $data
+    ]);
+}
 
     public function destroy($id)
     {

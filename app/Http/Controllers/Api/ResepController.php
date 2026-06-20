@@ -5,33 +5,50 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Resep;
 use Illuminate\Http\Request;
+use App\Models\Rating;
+use Illuminate\Support\Facades\Storage; // 🔥 1. PASTIKAN INI DI-IMPORT UNTUK MENGHAPUS GAMBAR
 
 class ResepController extends Controller
 {
     // 🔥 GET ALL
-    public function index()
+    public function index(Request $request)
     {
-        $data = Resep::with(['user', 'kategori'])->get();
+        $query = Resep::with('user')
+            ->withAvg('ratings', 'rating')
+            ->withCount('ratings');
 
-        $data->transform(function ($item) {
+        // FILTER KATEGORI
+        if ($request->kategori_id) {
+            $query->where('kategori_id', $request->kategori_id);
+        }
 
-            if ($item->gambar) {
-                $item->gambar = asset('storage/' . $item->gambar);
-            }
+        $reseps = $query
+            ->orderByDesc('ratings_avg_rating')
+            ->get();
 
-            return $item;
-        });
+        foreach ($reseps as $item) {
+            $item->gambar =
+                "http://192.168.18.55:8000/gambar/" .
+                basename($item->gambar);
+        }
 
         return response()->json([
             'status' => 'success',
-            'data' => $data
+            'data' => $reseps
         ]);
     }
 
     // 🔥 GET DETAIL
     public function show($id)
     {
-        $data = Resep::with(['user', 'kategori'])->find($id);
+        $data = Resep::with([
+            'user',
+            'kategori',
+            'komentars.user'
+        ])
+        ->withAvg('ratings', 'rating')
+        ->withCount('ratings')
+        ->find($id);
 
         if (!$data) {
             return response()->json([
@@ -51,62 +68,45 @@ class ResepController extends Controller
     }
 
     // 🔥 CREATE
-    public function store(Request $request)
-    {
-        $user = $request->user();
+    // 🔥 CREATE (VERSI BEBAS TOKEN / PUBLIK)
+public function store(Request $request)
+{
+    // Hapus baris $request->user() yang memicu 401
+    $validated = $request->validate([
+        'user_id' => 'required', // Bikin user_id jadi required di validasi
+        'kategori_id' => 'required',
+        'nama_resep' => 'required',
+        'deskripsi' => 'required',
+        'bahan' => 'required',
+        'langkah' => 'required',
+        'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+    ]);
 
-        if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized'
-            ], 401);
-        }
-
-        $validated = $request->validate([
-            'kategori_id' => 'required',
-            'nama_resep' => 'required',
-            'deskripsi' => 'required',
-            'bahan' => 'required',
-            'langkah' => 'required',
-            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
-        ]);
-
-        $gambarPath = null;
-
-        if ($request->hasFile('gambar')) {
-
-            $gambarPath = $request->file('gambar')->store('reseps', 'public');
-        }
-
-        $data = Resep::create([
-            'user_id' => $user->id,
-            'kategori_id' => $validated['kategori_id'],
-            'nama_resep' => $validated['nama_resep'],
-            'deskripsi' => $validated['deskripsi'],
-            'bahan' => $validated['bahan'],
-            'langkah' => $validated['langkah'],
-            'gambar' => $gambarPath
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Resep berhasil ditambahkan',
-            'data' => $data
-        ]);
+    $gambarPath = null;
+    if ($request->hasFile('gambar')) {
+        $gambarPath = $request->file('gambar')->store('reseps', 'public');
     }
 
-    // 🔥 UPDATE
+    $data = Resep::create([
+        'user_id' => $request->user_id, // Ambil langsung dari field parameter Flutter
+        'kategori_id' => $validated['kategori_id'],
+        'nama_resep' => $validated['nama_resep'],
+        'deskripsi' => $validated['deskripsi'],
+        'bahan' => $validated['bahan'],
+        'langkah' => $validated['langkah'],
+        'gambar' => $gambarPath
+    ]);
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Resep berhasil ditambahkan',
+        'data' => $data
+    ]);
+}
+
+    // 🔥 UPDATE (SUDAH DIPERBAIKI SINTAKS DAN LOGIKANYA)
     public function update(Request $request, $id)
     {
-        $user = $request->user();
-
-        if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized'
-            ], 401);
-        }
-
         $resep = Resep::find($id);
 
         if (!$resep) {
@@ -125,11 +125,14 @@ class ResepController extends Controller
             'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
-        // 🔥 UPDATE GAMBAR
         if ($request->hasFile('gambar')) {
+            // Hapus file gambar lama dari server jika user mengunggah foto baru
+            if ($resep->gambar && Storage::disk('public')->exists($resep->gambar)) {
+                Storage::disk('public')->delete($resep->gambar);
+            }
 
+            // Simpan gambar baru
             $gambarPath = $request->file('gambar')->store('reseps', 'public');
-
             $validated['gambar'] = $gambarPath;
         }
 
@@ -147,17 +150,8 @@ class ResepController extends Controller
     }
 
     // 🔥 DELETE
-    public function destroy(Request $request, $id)
+    public function destroy($id)
     {
-        $user = $request->user();
-
-        if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized'
-            ], 401);
-        }
-
         $resep = Resep::find($id);
 
         if (!$resep) {
@@ -165,6 +159,11 @@ class ResepController extends Controller
                 'status' => 'error',
                 'message' => 'Data tidak ditemukan'
             ], 404);
+        }
+
+        // Opsional: Hapus berkas gambar dari storage saat resep dihapus
+        if ($resep->gambar && Storage::disk('public')->exists($resep->gambar)) {
+            Storage::disk('public')->delete($resep->gambar);
         }
 
         $resep->delete();

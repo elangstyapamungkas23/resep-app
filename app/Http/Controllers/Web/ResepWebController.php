@@ -353,4 +353,25 @@ public function destroy($id)
         ->with('success', 'Resep berhasil dihapus');
 }
 
+public function trending()
+{
+
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+
+    // Ambil data resep top 30
+    $reseps = Resep::with(['ratings', 'user'])
+        ->withAvg('ratings', 'rating')
+        ->withCount('ratings')
+        ->whereHas('ratings') 
+        ->orderByDesc('ratings_avg_rating')
+        ->orderByDesc('ratings_count')
+        ->take(30)
+        ->get();
+
+    return view('trending', compact('reseps'));
+}
+
+
 }

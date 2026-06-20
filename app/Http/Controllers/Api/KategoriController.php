@@ -9,14 +9,12 @@ use Illuminate\Http\Request;
 class KategoriController extends Controller
 {
     public function index()
-    {
-        $data = Kategori::all();
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $data
-        ]);
-    }
+{
+    return response()->json([
+        'status' => 'success',
+        'data' => Kategori::all()
+    ]);
+}
 
     public function store(Request $request)
     {

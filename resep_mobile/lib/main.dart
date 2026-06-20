@@ -1,6 +1,12 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:resep_mobile/pages/favorite_page.dart';
+import 'pages/login_page.dart';
+import 'pages/register_page.dart';
+import 'pages/home_page.dart';
+import 'pages/resep_page.dart';
+import 'pages/detail_page.dart';
+import 'pages/profile_page.dart';
+import 'pages/create_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,53 +17,80 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: ResepPage());
-  }
-}
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
 
-class ResepPage extends StatefulWidget {
-  @override
-  State<ResepPage> createState() => _ResepPageState();
-}
+      initialRoute: '/login',
 
-class _ResepPageState extends State<ResepPage> {
-  List dataResep = [];
+      routes: {
+        '/login': (context) => const LoginPage(),
+        '/register': (context) => const RegisterPage(),
+        '/home': (context) => const MainNavigation(),
+      },
 
-  Future getData() async {
-    final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/reseps'),
-      headers: {
-        'Authorization':
-            'Bearer 15|fY4qeJysc3DJHIaGnICIlPOxslQuriWH17DLPwmKe166b41d',
+      onGenerateRoute: (settings) {
+        if (settings.name == '/detail') {
+          final resep = settings.arguments as Map;
+
+          return MaterialPageRoute(builder: (_) => DetailPage(resep: resep));
+        }
+
+        return null;
       },
     );
-
-    final data = jsonDecode(response.body);
-
-    setState(() {
-      dataResep = data['data'];
-    });
   }
+}
+
+class MainNavigation extends StatefulWidget {
+  const MainNavigation({super.key});
 
   @override
-  void initState() {
-    super.initState();
-    getData();
-  }
+  State<MainNavigation> createState() => _MainNavigationState();
+}
+
+class _MainNavigationState extends State<MainNavigation> {
+  int currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Data Resep")),
+      body: [
+        const HomePage(),
+        const ResepPage(),
+        const CreatePage(),
+        const FavoritePage(),
+        const ProfilePage(),
+      ][currentIndex],
 
-      body: ListView.builder(
-        itemCount: dataResep.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(dataResep[index]['nama_resep']),
-            subtitle: Text(dataResep[index]['deskripsi']),
-          );
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: currentIndex,
+        selectedItemColor: Colors.orange,
+        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
+
+        onTap: (index) {
+          setState(() {
+            currentIndex = index;
+          });
         },
+
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+
+          BottomNavigationBarItem(
+            icon: Icon(Icons.restaurant_menu),
+            label: "Resep",
+          ),
+
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_circle, size: 38),
+            label: "",
+          ),
+
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favorit"),
+
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
+        ],
       ),
     );
   }

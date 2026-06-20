@@ -54,7 +54,20 @@ class KomentarController extends Controller
             'data' => $data
         ]);
     }
+    
+public function update(Request $request, $id)
+{
+    $data = Komentar::findOrFail($id);
 
+    $data->update([
+        'komentar' => $request->komentar
+    ]);
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Komentar berhasil diupdate'
+    ]);
+}
     // 🔥 DELETE
     public function destroy($id)
     {

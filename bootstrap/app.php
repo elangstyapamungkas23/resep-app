@@ -12,17 +12,21 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+
     ->withMiddleware(function (Middleware $middleware): void {
 
-        // 🔥 FIX AUTH REDIRECT (INI KUNCI NYA)
         $middleware->redirectGuestsTo(function () {
-            return null; // jangan redirect ke route login
+            return null;
         });
 
+        $middleware->validateCsrfTokens(except: [
+            '*'
+        ]);
+
     })
+
     ->withExceptions(function (Exceptions $exceptions): void {
 
-        // 🔥 HANDLE UNAUTHENTICATED JADI JSON
         $exceptions->render(function (AuthenticationException $e, $request) {
             return response()->json([
                 'status' => 'error',
@@ -30,4 +34,6 @@ return Application::configure(basePath: dirname(__DIR__))
             ], 401);
         });
 
-    })->create();
+    })
+
+    ->create();

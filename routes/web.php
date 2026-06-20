@@ -4,11 +4,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\ResepWebController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Web\ProfileController;
+use App\Http\Controllers\AdminController;
 
 Route::get('/', [ResepWebController::class, 'home']);
 
 // AUTH
-Route::get('/login', [AuthController::class, 'loginForm']);
+Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/register', [AuthController::class, 'registerForm']);
@@ -20,7 +21,7 @@ Route::post('/logout', [AuthController::class, 'logout']);
 // PUBLIC
 Route::get('/reseps', [ResepWebController::class, 'index']);
 Route::view('/about', 'about');
-
+Route::get('/trending', [ResepWebController::class, 'trending']);
 
 // YANG HARUS LOGIN
 Route::middleware('auth')->group(function () {
@@ -31,9 +32,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile/edit', [ProfileController::class, 'edit']);
     Route::post('/profile/edit', [ProfileController::class, 'update']);
 
+    Route::get('/admin', [AdminController::class, 'dashboard'])
+    ->middleware('auth');
+    Route::delete('/admin/users/{id}',[AdminController::class, 'hapusUser']);
+
+
     // rating
     Route::post('/ratings', [ResepWebController::class, 'rating']);
     Route::delete('/ratings/{id}', [ResepWebController::class, 'hapusRating']);
+ 
 
     // komentar
     Route::post('/komentars', [ResepWebController::class, 'komentar']);
@@ -60,3 +67,30 @@ Route::middleware('auth')->group(function () {
 });
 
  Route::get('/reseps/{id}', [ResepWebController::class, 'show']);
+
+ Route::get('/gambar/{file}', function ($file) {
+
+    $path = storage_path('app/public/reseps/' . $file);
+
+    if (!file_exists($path)) {
+        abort(404);
+    }
+
+    return response()->file($path, [
+        'Access-Control-Allow-Origin' => '*',
+        'Access-Control-Allow-Methods' => '*',
+        'Access-Control-Allow-Headers' => '*',
+    ]);
+});
+
+Route::get('/test-cors', function () {
+    return response()->json(
+        ['ok' => true],
+        200,
+        [
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Allow-Methods' => '*',
+            'Access-Control-Allow-Headers' => '*',
+        ]
+    );
+});
