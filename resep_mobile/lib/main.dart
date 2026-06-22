@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:resep_mobile/pages/favorite_page.dart';
+import 'splash_screen.dart';
 import 'pages/login_page.dart';
 import 'pages/register_page.dart';
 import 'pages/home_page.dart';
@@ -20,9 +21,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
-      initialRoute: '/login',
+      initialRoute: '/splash',
 
       routes: {
+        '/splash': (context) => const SplashScreen(),
+
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/home': (context) => const MainNavigation(),
